@@ -1,0 +1,46 @@
+name: WordPress Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y php8.0-gd php8.0-mysql php8.0-mbstring php8.0-xml
+
+      - name: Set up MySQL
+        uses: mysql/setup-mysql@v1
+        with:
+          mysql-version: '8.0'
+          password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+
+      - name: Configure WordPress
+        run: |
+          cp wp-config-sample.php wp-config.php
+          sed -i "s/database_name_here/${{ secrets.DB_NAME }}/g" wp-config.php
+          sed -i "s/username_here/${{ secrets.DB_USERNAME }}/g" wp-config.php
+          sed -i "s/password_here/${{ secrets.DB_PASSWORD }}/g" wp-config.php
+          sed -i "s/localhost/${{ secrets.DB_HOST }}/g" wp-config.php
+
+      - name: Install WordPress
+        run: |
+          wp core download
+          wp core install --url="${{ secrets.WP_URL }}" --title="${{ secrets.WP_TITLE }}" --admin_user="${{ secrets.WP_ADMIN_USERNAME }}" --admin_password="${{ secrets.WP_ADMIN_PASSWORD }}" --admin_email="${{ secrets.WP_ADMIN_EMAIL }}"
+
+      - name: Deploy to server
+        run: |
+          # Add commands to deploy WordPress code to your server
