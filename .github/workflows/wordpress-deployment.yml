@@ -24,9 +24,9 @@ jobs:
       - name: Create EC2 instance
         run: |
           aws ec2 run-instances \
-            --image-id ami-053b0d53c279acc90  # Replace with the actual Ubuntu 22 AMI ID
-            --instance-type t2.micro  # Replace with your desired instance type
-            --key-name linux   # Replace with your EC2 key pair name
-            --subnet-id subnet-subnet-3b3fef76  # Replace with your desired subnet ID
-            --security-group-ids sg-80e53fd5  # Replace with your desired security group ID
+            --image-id ami-053b0d53c279acc90 \
+            --instance-type t2.micro \
+            --key-name linux \
+            --subnet-id subnet-subnet-3b3fef76 \
+            --security-group-ids sg-80e53fd5 \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
