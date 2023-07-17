@@ -31,10 +31,27 @@ jobs:
             --security-group-ids sg-80e53fd5 \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
             
-      - name: Run Script
-        run: |  
-          chmod +x dependencies.sh
-          ./dependencies.sh
+      - name: Wait for instance to initialize
+        run: |
+          sleep 60
+
+      - name: Get instance ID
+        id: instance-id
+        run: echo "::set-output name=id::$(echo ${{ steps.create-ec2.outputs.run-instances }} | jq -r '.Instances[0].InstanceId')"
+
+      - name: Wait for instance to initialize
+        run: |
+          sleep 60
+
+      - name: SSH into EC2 instance and run script
+        uses: ssh-action@v0.3.0
+        with:
+          host: ${{ steps.create-ec2.outputs.run-instances }}.ec2.internal
+          username: ubuntu
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            chmod +x dependencies.sh
+            ./dependencies.sh
 
       - name: Create MySQL User
         env:
