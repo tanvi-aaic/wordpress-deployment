@@ -33,5 +33,5 @@ jobs:
             
       - name: Run Script
         run: |  
-          chmod +x dependencies.sh \
-          bash ./dependencies.sh
+          chmod +x dependencies.sh
+          ./dependencies.sh
