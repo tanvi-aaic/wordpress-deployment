@@ -32,4 +32,6 @@ jobs:
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
             
       - name: Run Script
-        run: bash ./dependencies.sh
+        run: |  
+          chmod +x script.sh \
+          bash ./dependencies.sh
