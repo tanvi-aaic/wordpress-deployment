@@ -57,6 +57,8 @@ jobs:
           host: ${{ steps.create-ec2-instance.outputs.run-instances }}.ec2.internal
           username: ubuntu
           key: ${{ secrets.EC2_PRIVATE_KEY }}
+          extra_hosts: |
+            ${{ steps.public-ip.outputs.stdout }}:ec2-xx-xx-xx-xx.compute-1.amazonaws.com
           script: |
             chmod +x dependencies.sh
             ./dependencies.sh
