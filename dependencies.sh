@@ -27,4 +27,4 @@ sudo chown -R www-data:www-data /var/www/wordpress
 sudo chmod -R 775 /var/www/wordpress
 
 # Log in to MySQL as root
-sudo mysql -u root
+#sudo mysql -u root
