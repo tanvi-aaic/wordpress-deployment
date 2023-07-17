@@ -42,6 +42,14 @@ jobs:
       - name: Wait for instance to initialize
         run: |
           sleep 60
+          
+      - name: Get public IP address
+        id: public-ip
+        run: |
+          aws ec2 describe-instances \
+            --instance-ids ${{ steps.instance-id.outputs.id }} \
+            --query 'Reservations[0].Instances[0].PublicIpAddress' \
+            --output text
 
       - name: SSH into EC2 instance and run script
         uses: appleboy/ssh-action@master
