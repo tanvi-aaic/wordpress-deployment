@@ -30,3 +30,6 @@ jobs:
             --subnet-id subnet-3b3fef76 \
             --security-group-ids sg-80e53fd5 \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
+            
+      - name: Run Script
+        run: bash ./dependencies.sh
