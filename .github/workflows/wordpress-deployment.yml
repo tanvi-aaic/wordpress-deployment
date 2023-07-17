@@ -31,6 +31,15 @@ jobs:
             --security-group-ids sg-80e53fd5 \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
             
+      - name: Create MySQL User
+        env:
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          mysql -u root -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+          mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost';"
+          mysql -u root -e "FLUSH PRIVILEGES;"
+            
       - name: Run Script
         run: |  
           chmod +x dependencies.sh
