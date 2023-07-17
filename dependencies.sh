@@ -12,6 +12,7 @@ sudo apt install apache2 mysql-server -y
 # Enable Apache2 and MySQL services
 sudo chmod 755 /var/lib/mysql/mysql
 sudo systemctl enable apache2 mysql
+sudo systemctl restart mysql
 
 # Download and extract the latest WordPress
 wget -c http://wordpress.org/latest.tar.gz
