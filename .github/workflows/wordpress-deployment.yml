@@ -30,12 +30,13 @@ jobs:
         id: get-instance-ip
         run: |
           echo "::set-output name=instance-ip::$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=MyEC2Instance' --query 'Reservations[].Instances[].[PublicIpAddress]' --output text)"
-
-      - name: Deploy code to EC2
-        uses: easingthemes/ssh-deploy@main
+        
+      - name: Deploy in EC2
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
-          REMOTE_HOST: ${{ steps.get-instance-ip.outputs.instance-ip }}
-          REMOTE_USER: ubuntu
-          TARGET: /var/www/html/
-          SOURCE: ./
+            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
+            HOSTNAME : ${{ steps.get-instance-ip.outputs.instance-ip }}
+            USER_NAME : ubuntu
+            
+        run: |
+          echo "$AWS_PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
