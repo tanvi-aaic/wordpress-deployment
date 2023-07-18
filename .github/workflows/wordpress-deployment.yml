@@ -21,20 +21,21 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
-      - name: Create EC2 instance
-        run: |
-          aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro --security-group-ids sg-80e53fd5 --key-name ubuntu-key --count 1 --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MyEC2Instance}]" --subnet-id subnet-3b3fef76
-          sleep 10 # Wait for the instance to be provisioned
+      #- name: Create EC2 instance
+     #   run: |
+      #    aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro --security-group-ids sg-80e53fd5 --key-name ubuntu-key --count 1 --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MyEC2Instance}]" --subnet-id subnet-3b3fef76
+       #   sleep 10 # Wait for the instance to be provisioned
 
-      - name: Get instance IP address
-        id: get-instance-ip
-        run: |
-          echo "::set-output name=instance-ip::$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=MyEC2Instance' --query 'Reservations[].Instances[].[PublicIpAddress]' --output text)"
+      #- name: Get instance IP address
+       # id: get-instance-ip
+        #run: |
+         # echo "::set-output name=instance-ip::$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=MyEC2Instance' --query 'Reservations[].Instances[].[PublicIpAddress]' --output text)"
         
       - name: Deploy in EC2
         env:
             PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
-            HOSTNAME : ${{ steps.get-instance-ip.outputs.instance-ip }}
+            HOSTNAME : ${HOSTNAME}
+            #${{ steps.get-instance-ip.outputs.instance-ip }}
             USER_NAME : ubuntu
             
         run: |
