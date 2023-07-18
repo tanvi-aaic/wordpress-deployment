@@ -1,4 +1,4 @@
-name: Create EC2 Instance
+name: Create and Deploy to EC2
 
 on:
   push:
@@ -6,69 +6,35 @@ on:
       - main
 
 jobs:
-  create-ec2-instance:
+  create-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
+      - name: Set up AWS CLI
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Create EC2 instance
         run: |
-          aws ec2 run-instances \
-            --image-id ami-053b0d53c279acc90 \
-            --instance-type t2.micro \
-            --key-name linux \
-            --subnet-id subnet-3b3fef76 \
-            --security-group-ids sg-80e53fd5 \
-            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=MyInstance}]'
-            
-      - name: Wait for instance to initialize
+          aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro --security-group-ids sg-80e53fd5 --key-name linux --count 1 --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MyEC2Instance}]" --subnet-id subnet-3b3fef76
+          sleep 10 # Wait for the instance to be provisioned
+
+      - name: Get instance IP address
+        id: get-instance-ip
         run: |
-          sleep 60
+          echo "::set-output name=instance-ip::$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=MyEC2Instance' --query 'Reservations[].Instances[].[PublicIpAddress]' --output text)"
 
-      - name: Get instance ID
-        id: instance-id
-        run: echo "::set-output name=id::$(echo ${{ steps.create-ec2-instance.outputs.run-instances }} | jq -r '.Instances[0].InstanceId')"
-
-      - name: Wait for instance to initialize
-        run: |
-          sleep 60
-          
-      - name: Get public IP address
-        id: public-ip
-        run: |
-          aws ec2 describe-instances \
-            --instance-ids ${{ steps.instance-id.outputs.id }} \
-            --query 'Reservations[0].Instances[0].PublicIpAddress' \
-            --output text
-
-      - name: SSH into EC2 instance and run script
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ steps.create-ec2-instance.outputs.run-instances }}.ec2.internal
-          username: ubuntu
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          extra_hosts: |
-            ${{ steps.public-ip.outputs.stdout }}:ec2-xx-xx-xx-xx.compute-1.amazonaws.com
-          script: |
-            chmod +x dependencies.sh
-            ./dependencies.sh
-
-      - name: Create MySQL User
+      - name: Deploy code to EC2
+        uses: easingthemes/ssh-deploy@main
         env:
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          mysql -u root -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
-          mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost';"
-          mysql -u root -e "FLUSH PRIVILEGES;"
-          mysql -u $DB_USERNAME -p$DB_PASSWORD;
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ steps.get-instance-ip.outputs.instance-ip }}
+          REMOTE_USER: ubuntu
+          TARGET: /var/www/html/
+          SOURCE: ./
