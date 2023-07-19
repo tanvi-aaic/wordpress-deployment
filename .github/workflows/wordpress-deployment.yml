@@ -69,8 +69,6 @@ jobs:
           echo ${USER_NAME}
           echo ${HOSTNAME}
           echo "${USER_NAME}@${HOSTNAME}"
-          
-          
 
           # Install httpd on the EC2 instance
           ssh -i temporary.pem "${USER_NAME}@${HOSTNAME}" 'sudo apt update && sudo apt install -y apache2'
