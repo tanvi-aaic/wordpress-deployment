@@ -33,8 +33,10 @@ jobs:
             --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MyEC2Instance}]" \
             --subnet-id subnet-3b3fef76 \
             --user-data '#!/bin/bash
-                        apt update
-                        apt install -y apache2')
+                        apt update -y
+                        apt install -y apache2
+                        sudo apt install php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y
+                        ')
 
           echo "::set-output name=instance-id::$(echo $instance_id | jq -r '.Instances[0].InstanceId')"
 
@@ -44,7 +46,7 @@ jobs:
           aws ec2 wait instance-running --instance-ids "$instance_id"
           
       - name: Wait for 60 seconds
-        run: sleep 300
+        run: sleep 60
 
       - name: Get instance IP address
         id: get-instance-ip
