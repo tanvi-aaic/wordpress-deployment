@@ -52,7 +52,7 @@ jobs:
           instance_id="${{ steps.create-instance.outputs.instance-id }}"
           aws ec2 describe-instances \
             --instance-ids "$instance_id" \
-            --query 'Reservations[].Instances[].PublicIpAddress' \
+            --query 'Reservations[].Instances[].PublicDnsName' \
             --output text > instance_ip.txt
 
       - name: Install httpd on EC2 instance
