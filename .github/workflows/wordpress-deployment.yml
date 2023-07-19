@@ -39,5 +39,4 @@ jobs:
             USER_NAME : ubuntu
             
         run: |
-          echo "$AWS_PRIVATE_KEY" > PRIVATE_KEY && chmod 600 PRIVATE_KEY
-          ssh -o StrictHostKeyChecking=no -i PRIVATE_KEY -p 2222 ${USER_NAME}@${HOSTNAME} 'sudo apt install httpd'
+          ssh -o StrictHostKeyChecking=no -i $AWS_PRIVATE_KEY -p 2222 ${USER_NAME}@${HOSTNAME} 'sudo apt install httpd'
