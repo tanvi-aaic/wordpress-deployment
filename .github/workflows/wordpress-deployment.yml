@@ -62,6 +62,12 @@ jobs:
 
           # Read the instance IP address from the file
           HOSTNAME=$(cat instance_ip.txt)
+          
+          echo ${USER_NAME}
+          echo ${HOSTNAME}
+          echo "${USER_NAME}@${HOSTNAME}"
+          
+          
 
           # Install httpd on the EC2 instance
-          ssh -o StrictHostKeyChecking=no -i temporary.pem -p 22 "${USER_NAME}@${HOSTNAME}" 'sudo apt update && sudo apt install -y apache2'
+          ssh -i temporary.pem "${USER_NAME}@${HOSTNAME}" 'sudo apt update && sudo apt install -y apache2'
