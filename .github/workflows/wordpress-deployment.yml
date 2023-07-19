@@ -1,47 +1,3 @@
-#name: Create and Deploy to EC2
-
-#on:
-#  push:
- #   branches:
-#      - main
-
-#jobs:
-#  create-and-deploy:
- #   runs-on: ubuntu-latest
-
-  #  steps:
-   #   - name: Checkout code
-   #     uses: actions/checkout@v2
-
-    #  - name: Set up AWS CLI
-    #    uses: aws-actions/configure-aws-credentials@v1
-    #    with:
-   #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #        aws-region: ${{ secrets.AWS_REGION }}
-  #        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-
-  #    - name: Create EC2 instance
-     #   run: |
-     #     aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro --security-group-ids sg-80e53fd5 --key-name ubuntu-key --count 1 --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MyEC2Instance}]" --subnet-id subnet-3b3fef76 --user-data '#!/bin/bash
-      #                  apt update
-    #                    apt install -y apache2')
-   #       sleep 10 # Wait for the instance to be provisioned
-
-    #  - name: Get instance IP address
-      #  id: get-instance-ip
-      #  run: |
-         # echo "::set-output name=instance-ip::$(aws ec2 describe-instances --filters 'Name=tag:Name,Values=MyEC2Instance' --query 'Reservations[].Instances[].[PublicIpAddress]' --output text)"
-        
-     # - name: Deploy in EC2
-     #   env:
-      #      PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
-      #      HOSTNAME : ${HOSTNAME}
-        #    #${{ steps.get-instance-ip.outputs.instance-ip }}
-        #    USER_NAME : ubuntu
-            
-  #      run: |
-  #        ssh -o StrictHostKeyChecking=no -i $AWS_PRIVATE_KEY -p 2222 ${USER_NAME}@${HOSTNAME} 'sudo apt install httpd'
 name: Create EC2 Instance and Install httpd
 
 on:
@@ -94,14 +50,18 @@ jobs:
           aws ec2 describe-instances \
             --instance-ids "$instance_id" \
             --query 'Reservations[].Instances[].PublicIpAddress' \
-            --output text
-      
+            --output text > instance_ip.txt
+
       - name: Install httpd on EC2 instance
         env:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
-          HOSTNAME: ${{ steps.get-instance-ip.outputs.stdout }}
           USER_NAME: ubuntu
         run: |
           echo "$AWS_PRIVATE_KEY" > temporary.pem && \
-          chmod 400 temporary.pem && \
+          chmod 400 temporary.pem
+
+          # Read the instance IP address from the file
+          HOSTNAME=$(cat instance_ip.txt)
+
+          # Install httpd on the EC2 instance
           ssh -o StrictHostKeyChecking=no -i temporary.pem -p 22 "${USER_NAME}@${HOSTNAME}" 'sudo apt update && sudo apt install -y apache2'
