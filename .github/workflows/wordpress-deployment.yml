@@ -102,4 +102,6 @@ jobs:
           HOSTNAME: ${{ steps.get-instance-ip.outputs.stdout }}
           USER_NAME: ubuntu
         run: |
-          ssh -o StrictHostKeyChecking=no -i "$PRIVATE_KEY" -p 22 "${USER_NAME}@${HOSTNAME}" 'sudo apt update && sudo apt install -y apache2'
+          echo ${{ secrets.AWS_PRIVATE_KEY }} > temporary.pem && \
+          chmod 400 temporary.pem && \
+          
