@@ -63,7 +63,7 @@ jobs:
           USER_NAME: ubuntu
         run: |
           mkdir -p ~/.ssh/
-          echo "$AWS_PRIVATE_KEY" > ~/.ssh/private.key
+          echo $AWS_PRIVATE_KEY > ~/.ssh/private.key
           chmod 600 ~/.ssh/private.key
           
           # Read the instance IP address from the file
