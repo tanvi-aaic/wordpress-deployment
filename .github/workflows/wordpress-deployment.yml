@@ -62,16 +62,11 @@ jobs:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
           USER_NAME: ubuntu
         run: |
-          mkdir -p ~/.ssh/
-          echo $AWS_PRIVATE_KEY > ~/.ssh/private.key
-          chmod 600 ~/.ssh/private.key
-          
+          echo $AWS_PRIVATE_KEY > temporary.pem && \
+          chmod 400 temporary.pem
+
           # Read the instance IP address from the file
           HOSTNAME=$(cat instance_ip.txt)
-          
-          echo ${USER_NAME}
-          echo ${HOSTNAME}
-          echo "${USER_NAME}@${HOSTNAME}"
 
           # Install httpd on the EC2 instance
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/private.key -p 22 "${USER_NAME}@${HOSTNAME}" 'whoami'
+          ssh -o StrictHostKeyChecking=no -i temporary.pem -p 22 "${USER_NAME}@${HOSTNAME}"
