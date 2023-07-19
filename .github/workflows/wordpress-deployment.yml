@@ -44,7 +44,7 @@ jobs:
           aws ec2 wait instance-running --instance-ids "$instance_id"
           
       - name: Wait for 60 seconds
-        run: sleep 120
+        run: sleep 300
 
       - name: Get instance IP address
         id: get-instance-ip
