@@ -60,11 +60,15 @@ jobs:
       - name: Install httpd on EC2 instance
         env:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+          PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}
           USER_NAME: ubuntu
         run: |
           echo $AWS_PRIVATE_KEY > temporary.pem && \
           chmod 400 temporary.pem
-
+          
+          echo $AWS_PUBLIC_KEY > temporary1.pem && \
+          chmod 400 temporary1.pem
+          
           # Read the instance IP address from the file
           HOSTNAME=$(cat instance_ip.txt)
 
