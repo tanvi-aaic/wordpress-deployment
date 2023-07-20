@@ -59,7 +59,7 @@ jobs:
             --instance-ids "$instance_id" \
             --query 'Reservations[].Instances[].PublicDnsName' \
             --output text > instance_ip.txt
-
+            
       - name: Install httpd on EC2 instance
         env:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
