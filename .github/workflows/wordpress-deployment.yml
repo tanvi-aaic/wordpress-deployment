@@ -49,7 +49,7 @@ jobs:
           sleep 5  # Wait for 5 seconds before checking again
           done
 
-echo "Instance is now healthy"
+          echo "Instance is now healthy"
 
       - name: Get instance IP address
         id: get-instance-ip
