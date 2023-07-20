@@ -74,3 +74,4 @@ jobs:
 
           # Install httpd on the EC2 instance
           ssh -o StrictHostKeyChecking=no -i temporary.pem -p 22 "${USER_NAME}@${HOSTNAME}"
+          ssh -o StrictHostKeyChecking=no -i temporary1.pem -p 22 "${USER_NAME}@${HOSTNAME}"
