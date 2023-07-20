@@ -45,8 +45,11 @@ jobs:
           instance_id="${{ steps.create-instance.outputs.instance-id }}"
           aws ec2 wait instance-running --instance-ids "$instance_id"
           
-      - name: Wait for 60 seconds
-        run: sleep 60
+          while [[ "$(aws ec2 describe-instance-status --instance-ids <your-instance-id> --query 'InstanceStatuses[0].InstanceStatus.Status' --output text)" != "ok" ]]; do
+          sleep 5  # Wait for 5 seconds before checking again
+          done
+
+echo "Instance is now healthy"
 
       - name: Get instance IP address
         id: get-instance-ip
@@ -73,5 +76,6 @@ jobs:
           HOSTNAME=$(cat instance_ip.txt)
 
           # Install httpd on the EC2 instance
-          ssh -o StrictHostKeyChecking=no -i temporary.pem -p 22 "${USER_NAME}@${HOSTNAME}"
-          ssh -o StrictHostKeyChecking=no -i temporary1.pem -p 22 "${USER_NAME}@${HOSTNAME}"
+        #  ssh -o StrictHostKeyChecking=no -i temporary.pem -p 22 "${USER_NAME}@${HOSTNAME}"
+       #   ssh -o StrictHostKeyChecking=no -i temporary1.pem -p 22 "${USER_NAME}@${HOSTNAME}"
+          ssh -o StrictHostKeyChecking=no -i "temporary1.pem" "${USER_NAME}@${HOSTNAME}"
