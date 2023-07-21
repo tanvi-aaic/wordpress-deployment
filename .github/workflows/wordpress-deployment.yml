@@ -13,7 +13,7 @@ jobs:
       - name: Create package.json
         run: echo "{}" > package.json
       - name: Create composer.json
-        run: echo '{"require": {"vendor/package": "version"}}' > composer.json
+        run: echo '{"require": {"vendor/package": "version"}}' > ${{ github.workspace }}/composer.json
       - name: Get npm cache directory
         id: npm-cache-dir
         run: |
