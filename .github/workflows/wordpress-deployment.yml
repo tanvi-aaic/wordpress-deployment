@@ -1,79 +1,71 @@
-name: Create EC2 Instance and Install httpd
+name: Build The Theme & Deploy
 
 on:
-  push:
+  pull request:
     branches:
-      - main
+      - dev-deploy
+    types: [closed]
+
+defaults:
+  run:
+    working-directory: themes/my-theme
 
 jobs:
-  create-and-deploy:
+  run-github-action:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
+      - uses: actions/checkout@v2
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        id: npm-cache
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-
-      - name: Create EC2 instance
-        id: create-instance
-        run: |
-          instance_id=$(aws ec2 run-instances \
-            --image-id ami-053b0d53c279acc90 \
-            --instance-type t2.micro \
-            --security-group-ids sg-80e53fd5 \
-            --key-name ubuntu-key \
-            --count 1 \
-            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MyEC2Instance}]" \
-            --subnet-id subnet-3b3fef76 \
-            --user-data '#!/bin/bash
-                        apt update -y
-                        apt install -y apache2
-                        sudo apt install php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y
-                        ')
-
-          echo "::set-output name=instance-id::$(echo $instance_id | jq -r '.Instances[0].InstanceId')"
-
-      - name: Wait for EC2 instance to be ready
-        run: |
-          instance_id="${{ steps.create-instance.outputs.instance-id }}"
-          aws ec2 wait instance-running --instance-ids "$instance_id"
-          
-          while [[ "$(aws ec2 describe-instance-status --instance-ids $instance_id --query 'InstanceStatuses[0].InstanceStatus.Status' --output text)" != "ok" ]]; do
-          sleep 5  # Wait for 5 seconds before checking again
-          done
-
-          echo "Instance is now healthy"
-
-      - name: Get instance IP address
-        id: get-instance-ip
-        run: |
-          instance_id="${{ steps.create-instance.outputs.instance-id }}"
-          aws ec2 describe-instances \
-            --instance-ids "$instance_id" \
-            --query 'Reservations[].Instances[].PublicDnsName' \
-            --output text > instance_ip.txt
-            
-      - name: Install httpd on EC2 instance
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: ADD NODE JS v12.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12.x"
+      - name: ADD PHP v 7.4.x
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          tools: composer:v2
+      - name: RUN NPM
+        run: npm ci
+      - name: RUN COMPOSER
+        run: composer install
+      - name: BUILD THEME
+        run: npm run prod
+      - name: Before Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.AWS_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            sudo rm -rf /var/www/html/wp/wp-content/themes/my-theme/*
+            sudo chown -R ubuntu /var/www/html/wp/wp-content/themes/
+      - name: Deploy to AWS Server
+        uses: easingthemes/ssh-deploy@main
         env:
-          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
-          PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}
-          USER_NAME: ubuntu
-        run: |
-          echo $AWS_PRIVATE_KEY > temporary.pem && \
-          chmod 400 temporary.pem
-          
-          echo $AWS_PUBLIC_KEY > temporary1.pem && \
-          chmod 400 temporary1.pem
-          
-          # Read the instance IP address from the file
-          HOSTNAME=$(cat instance_ip.txt)
-
-          # Install httpd on the EC2 instance
-          ssh -o StrictHostKeyChecking=no -i "temporary1.pem" "${USER_NAME}@${HOSTNAME}"
+          SSH_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          SOURCE: "themes/my-theme/"
+          TARGET: "/var/www/html/wp/wp-content/themes/my-theme/"
+          EXCLUDE: "/node_modules/"
+      - name: After Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.AWS_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            sudo chown -R www-data:www-data /var/www/html/wp/wp-content/themes/
