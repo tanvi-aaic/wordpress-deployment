@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Create package.json
+        run: echo "{}" > package.json
       - name: Get npm cache directory
         id: npm-cache-dir
         run: |
@@ -30,8 +32,8 @@ jobs:
         with:
           php-version: "7.4"
           tools: composer:v2
-      - name: RUN NPM
-        run: npm ci
+      - name: Install npm dependencies
+        run: npm install
       - name: RUN COMPOSER
         run: composer install
       - name: BUILD THEME
