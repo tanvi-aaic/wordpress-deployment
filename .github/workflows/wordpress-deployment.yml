@@ -1,14 +1,10 @@
 name: Build The Theme & Deploy
 
 on:
-  pull request:
+  pull_request:
     branches:
       - dev-deploy
     types: [closed]
-
-defaults:
-  run:
-    working-directory: themes/my-theme
 
 jobs:
   run-github-action:
