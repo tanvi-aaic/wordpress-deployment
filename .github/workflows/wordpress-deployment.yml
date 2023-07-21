@@ -1,10 +1,9 @@
 name: Build The Theme & Deploy
 
 on:
-  pull_request:
+  push:
     branches:
-      - dev-deploy
-    types: [closed]
+      - main
 
 jobs:
   run-github-action:
