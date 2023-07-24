@@ -10,7 +10,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Add the 'aws-cli' step here (same as the existing one) to set up AWS CLI.
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
       - name: Check if instance exists
         id: check-instance
