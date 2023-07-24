@@ -61,9 +61,10 @@ jobs:
 
       - name: Wait for EC2 instance to be ready
         run: |
-          instance_id="${{ steps.create-instance.outputs.instance-id }}"
-          echo "Instance ID: $instance_id"  # Add this line for debugging
-          aws ec2 wait instance-running --instance-ids "$instance_id"
+         instance_id="${{ steps.create-instance.outputs.instance-id }}"
+         echo "Instance ID: $instance_id"  # Add this line for debugging
+         aws ec2 wait instance-running --instance-ids "${instance_id}"
+
 
       - name: Wait for 60 seconds
         run: sleep 60
