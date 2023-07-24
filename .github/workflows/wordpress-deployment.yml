@@ -1,10 +1,10 @@
 on:
- push:
-  branches:
-    - main
+  push:
+    branches:
+      - main
 
 jobs:
-  create-and-deploy:
+  create-instance:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -28,14 +28,12 @@ jobs:
               echo "Instance already exists and is running."
               exit 0
             else
-              echo "Instance exists but is not running, creating a new one."
+              echo "Instance exists but is not running, terminating it."
               aws ec2 terminate-instances --instance-ids "$instance_id"
-              rm instance_id.txt
             fi
           fi
 
       - name: Create EC2 instance
-        if: steps.check-instance.outputs.exit-code != 0
         id: create-instance
         run: |
           instance_id=$(aws ec2 run-instances \
@@ -53,26 +51,20 @@ jobs:
                         ')
           echo "AWS CLI Command: aws ec2 run-instances ..."
           echo "Command Output: $instance_id"
-          echo "::set-output name=instance-id::$(echo $instance_id | jq -r '.Instances[0].InstanceId')"
           echo "$instance_id" > instance_id.txt
-
           echo "::set-output name=instance-id::$(echo $instance_id | jq -r '.Instances[0].InstanceId')"
-          echo "$instance_id" > instance_id.txt
 
-      - name: Wait for EC2 instance to be ready
-        run: |
-         instance_id="${{ steps.create-instance.outputs.instance-id }}"
-         echo "Instance ID: $instance_id"  # Add this line for debugging
-         aws ec2 wait instance-running --instance-ids "${instance_id}"
-
-
+  deploy-instance:
+    needs: create-instance
+    runs-on: ubuntu-latest
+    steps:
       - name: Wait for 60 seconds
         run: sleep 60
 
       - name: Get instance IP address
         id: get-instance-ip
         run: |
-          instance_id="${{ steps.create-instance.outputs.instance-id }}"
+          instance_id=$(cat instance_id.txt)
           aws ec2 describe-instances \
             --instance-ids "$instance_id" \
             --query 'Reservations[].Instances[].PublicDnsName' \
