@@ -6,6 +6,8 @@ on:
 jobs:
   create-instance:
     runs-on: ubuntu-latest
+    outputs:
+      instance-id: ${{ steps.create-instance.outputs.instance-id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -36,13 +38,7 @@ jobs:
                         ')
           echo "AWS CLI Command: aws ec2 run-instances ..."
           echo "Command Output: $instance_id"
-          echo "::set-output name=instance-id::$(echo $instance_id | jq -r '.Instances[0].InstanceId')"
-
-          # Save instance_id to instance_id.txt in the workspace
-          echo "$instance_id" > instance_id.txt
-
-          # Display the contents of instance_id.txt for debugging purposes
-          cat instance_id.txt
+          echo "::set-output name=instance-id::$instance_id"
 
   deploy-instance:
     needs: create-instance
@@ -51,14 +47,20 @@ jobs:
       - name: Wait for 60 seconds
         run: sleep 60
 
+      - name: Get instance ID
+      #run: echo "Instance ID: ${{ needs.create-instance.outputs.instance-id }}"  # For debugging purposes
+
       - name: Get instance IP address
         id: get-instance-ip
         run: |
-          instance_id=$(cat instance_id.txt)
+          instance_id="${{ needs.create-instance.outputs.instance-id }}"
           aws ec2 describe-instances \
             --instance-ids "$instance_id" \
             --query 'Reservations[].Instances[].PublicDnsName' \
             --output text > instance_ip.txt
+
+      # Rest of the steps remain unchanged...
+
 
       - name: Install httpd on EC2 instance
         env:
