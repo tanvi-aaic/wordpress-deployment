@@ -51,6 +51,10 @@ jobs:
                         apt install -y apache2
                         #sudo apt install php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y
                         ')
+           echo "AWS CLI Command: aws ec2 run-instances ..."
+           echo "Command Output: $instance_id"
+           echo "::set-output name=instance-id::$(echo $instance_id | jq -r '.Instances[0].InstanceId')"
+           echo "$instance_id" > instance_id.txt
 
           echo "::set-output name=instance-id::$(echo $instance_id | jq -r '.Instances[0].InstanceId')"
           echo "$instance_id" > instance_id.txt
