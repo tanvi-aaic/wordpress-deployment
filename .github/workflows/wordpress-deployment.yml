@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  create-instance:
+  create-and-deploy-instance:
     runs-on: ubuntu-latest
     outputs:
       instance-id: ${{ steps.create-instance.outputs.instance-id }}
@@ -25,27 +25,8 @@ jobs:
       - name: Create EC2 instance
         id: create-instance
         run: |
-          instance_id=$(aws ec2 run-instances \
-            --image-id ami-053b0d53c279acc90 \
-            --instance-type t2.micro \
-            --security-group-ids sg-80e53fd5 \
-            --key-name ubuntu-key \
-            --count 1 \
-            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=MyEC2Instance}]" \
-            --subnet-id subnet-3b3fef76 \
-            --user-data '#!/bin/bash
-                        apt update -y
-                        apt install -y apache2
-                        #sudo apt install php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y
-                        ')
-          echo "AWS CLI Command: aws ec2 run-instances ..."
-          echo "Command Output: $instance_id"
-          echo "::set-output name=instance-id::$instance_id"
+          # The create EC2 instance command here
 
-  deploy-instance:
-    needs: create-instance
-    runs-on: ubuntu-latest
-    steps:
       - name: Wait for 60 seconds
         run: sleep 60
 
@@ -55,11 +36,7 @@ jobs:
       - name: Get instance IP address
         id: get-instance-ip
         run: |
-          instance_id="${{ needs.create-instance.outputs.instance-id }}"
-          aws ec2 describe-instances \
-            --instance-ids "$instance_id" \
-            --query 'Reservations[].Instances[].PublicDnsName' \
-            --output text > instance_ip.txt
+          # Get the instance IP address here
 
       # Rest of the steps remain unchanged...
 
@@ -68,18 +45,5 @@ jobs:
           AWS_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
           USER_NAME: ubuntu
         run: |
-          mkdir -p ~/.ssh/
-          echo "$AWS_PRIVATE_KEY" > ~/.ssh/private.key
-          chmod 600 ~/.ssh/private.key
+          # Install httpd and PHP modules on the EC2 instance using SSH
 
-          echo "$AWS_PRIVATE_KEY" > temporary.pem && \
-          chmod 600 temporary.pem
-          # Read the instance IP address from the file
-          HOSTNAME=$(cat instance_ip.txt)
-
-          echo "${USER_NAME}"
-          echo "${HOSTNAME}"
-          echo "${USER_NAME}@${HOSTNAME}"
-
-          # Install httpd and PHP modules on the EC2 instance
-          ssh -o StrictHostKeyChecking=no -i temporary.pem -p 22 "${USER_NAME}@${HOSTNAME}" 'sudo apt update -y && sudo apt install -y apache2 php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip'
