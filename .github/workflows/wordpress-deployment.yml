@@ -1,3 +1,5 @@
+name: Your Workflow Name
+
 on:
   push:
     branches:
@@ -61,23 +63,22 @@ jobs:
 
       # Rest of the steps remain unchanged...
 
-
       - name: Install httpd on EC2 instance
         env:
-          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+          AWS_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
           USER_NAME: ubuntu
         run: |
           mkdir -p ~/.ssh/
-          echo $AWS_PRIVATE_KEY > ~/.ssh/private.key
+          echo "$AWS_PRIVATE_KEY" > ~/.ssh/private.key
           chmod 600 ~/.ssh/private.key
 
-          echo $AWS_PRIVATE_KEY > temporary.pem && \
+          echo "$AWS_PRIVATE_KEY" > temporary.pem && \
           chmod 600 temporary.pem
           # Read the instance IP address from the file
           HOSTNAME=$(cat instance_ip.txt)
 
-          echo ${USER_NAME}
-          echo ${HOSTNAME}
+          echo "${USER_NAME}"
+          echo "${HOSTNAME}"
           echo "${USER_NAME}@${HOSTNAME}"
 
           # Install httpd and PHP modules on the EC2 instance
