@@ -48,7 +48,7 @@ jobs:
         run: sleep 60
 
       - name: Get instance ID
-      #run: echo "Instance ID: ${{ needs.create-instance.outputs.instance-id }}"  # For debugging purposes
+        run: echo "Instance ID: ${{ needs.create-instance.outputs.instance-id }}"  # For debugging purposes
 
       - name: Get instance IP address
         id: get-instance-ip
