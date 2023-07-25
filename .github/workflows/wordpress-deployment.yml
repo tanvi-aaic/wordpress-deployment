@@ -27,7 +27,7 @@ jobs:
       - name: Create EC2 instance
         id: create_ec2
         run: |
-          instance_id=$(aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro  --key-name ubuntu-key  --security-group-ids sg-80e53fd5  --subnet-id subnet-3b3fef76   --query 'Instances[0].InstanceId'  --output text)
+          instance_id=$(aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro --key-name ubuntu-key --security-group-ids sg-80e53fd5 --subnet-id subnet-3b3fef76 --query 'Instances[0].InstanceId' --output text)
           echo "INSTANCE_ID=$instance_id" >> $GITHUB_ENV
 
       - name: Wait for EC2 instance to start
@@ -44,15 +44,27 @@ jobs:
 
       - name: Deploy in EC2
         env:
-            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
+          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
         run: |
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip  '
-          
-              #Now we have got the access of EC2 and we will start the deploy .
 
-              cd /home/ubuntu/ &&
-              sudo apt-get install apache2 -y &&
-              sudo systemctl start apache2
-          '
+          # Transfer the add_wordpress_conf.sh script to the EC2 instance
+          ./.github/actions/ssh-action/entrypoint.sh \
+            -i private_key \
+            -o StrictHostKeyChecking=no \
+            ubuntu@$instance_ip \
+            "mkdir -p /home/ubuntu/deploy && chmod 700 /home/ubuntu/deploy"
+
+          ./.github/actions/ssh-action/scp.sh \
+            -i private_key \
+            -o StrictHostKeyChecking=no \
+            ./add_wordpress_conf.sh \
+            ubuntu@$instance_ip:/home/ubuntu/deploy
+
+          # Execute the script on the EC2 instance
+          ./.github/actions/ssh-action/entrypoint.sh \
+            -i private_key \
+            -o StrictHostKeyChecking=no \
+            ubuntu@$instance_ip \
+            "bash /home/ubuntu/deploy/add_wordpress_conf.sh"
