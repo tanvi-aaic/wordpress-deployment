@@ -1,49 +1,57 @@
-name: Your Workflow Name
-
+name: Create EC2 instance and Deploy
 on:
   push:
     branches:
       - main
 
 jobs:
-  create-and-deploy-instance:
+  create-and-install:
     runs-on: ubuntu-latest
-    outputs:
-      instance-id: ${{ steps.create-instance.outputs.instance-id }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Configure AWS credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region ${{ secrets.AWS_REGION }}
 
       - name: Create EC2 instance
-        id: create-instance
+        id: create_ec2
         run: |
-          # The create EC2 instance command here
+          instance_id=$(aws ec2 run-instances --image-id ami-0f5ee92e2d63afc18 --instance-type t2.micro  --key-name ubuntu-key  --security-group-ids sg-052f1583c995d1901  --subnet-id subnet-0803f42df7b4a2f32   --query 'Instances[0].InstanceId'  --output text)
+          echo "INSTANCE_ID=$instance_id" >> $GITHUB_ENV
 
-      - name: Wait for 60 seconds
-        run: sleep 60
-
-      - name: Get instance ID
-        run: echo "Instance ID: ${{ needs.create-instance.outputs.instance-id }}"  # For debugging purposes
-
-      - name: Get instance IP address
-        id: get-instance-ip
+      - name: Wait for EC2 instance to start
         run: |
-          # Get the instance IP address here
+          instance_id=$INSTANCE_ID
+          aws ec2 wait instance-running --instance-ids $instance_id
 
-      # Rest of the steps remain unchanged...
+      - name: Get instance public IP
+        id: get_instance_ip
+        run: |
+          instance_id=$INSTANCE_ID
+          public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+          echo "INSTANCE_IP=$public_ip" >> $GITHUB_ENV
 
-      - name: Install httpd on EC2 instance
+      - name: Deploy in EC2
         env:
-          AWS_PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
-          USER_NAME: ubuntu
+            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
         run: |
-          # Install httpd and PHP modules on the EC2 instance using SSH
+          instance_ip=$INSTANCE_IP
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip  '
+          
+              #Now we have got the access of EC2 and we will start the deploy .
 
+              cd /home/ubuntu/ &&
+              sudo apt-get install apache2 -y &&
+              sudo systemctl start apache2
+          '
