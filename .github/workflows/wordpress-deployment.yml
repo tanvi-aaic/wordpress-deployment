@@ -53,5 +53,6 @@ jobs:
          # sudo apt-get install apache2 -y &&
          # sudo systemctl start apache2
       - name: Run build script
-        run: curl -o dependencies.sh https://raw.githubusercontent.com/tanvi-aaic/wordpress-deployment/main/dependencies.sh && chmod +x dependencies.sh && ./dependencies.sh
-        shell: bash
+        run: |
+          chmod +x dependencies.sh
+          ./dependencies.sh 
