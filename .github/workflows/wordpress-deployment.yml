@@ -43,7 +43,7 @@ jobs:
           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
           echo "INSTANCE_IP=$public_ip" >> $GITHUB_ENV
 
-      - name: Install Git in EC2
+      - name: Deploy in EC2
         env:
             PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
         run: |
@@ -56,5 +56,9 @@ jobs:
               cd /home/ubuntu/ &&
               sudo apt-get install apache2 -y &&
               sudo systemctl start apache2
-          '
+              - name: Run build script
+      
+              chmod +x dependencies.sh
+              ./dependencies.sh 
+              '
 
