@@ -2,26 +2,26 @@
 
 # Update package information and install required packages
 sudo apt update -y
-sudo apt install apache2 mysql-server php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y
+sudo apt install debconf-utils apache2 mysql-server php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y
 php --version
 mysql --version
 
-# Set correct permissions for MySQL
+# Set MySQL root password without prompt
+echo "mysql-server mysql-server/root_password password YourMySQLRootPassword" | sudo debconf-set-selections
+echo "mysql-server mysql-server/root_password_again password YourMySQLRootPassword" | sudo debconf-set-selections
+
+# Install MySQL and set correct permissions
+sudo apt install -y mysql-server
 sudo chmod 755 /var/lib/mysql/mysql
 
 # Enable and restart Apache and MySQL services
 sudo systemctl enable apache2 mysql
-#sudo systemctl restart mysql
-# Create an expect script to automatically enter the password when prompted
-expect <<EOD
-  spawn sudo systemctl restart apache2 mysql
-  expect "assword:"
-  send "\r"
-  expect eof
-EOD
+
+# Restart MySQL service (this will apply the password we set above)
+sudo systemctl restart mysql
 
 # Create WordPress database and user
-sudo mysql -u root -p <<MYSQL_SCRIPT
+sudo mysql -u root -pYourMySQLRootPassword <<MYSQL_SCRIPT
 CREATE DATABASE wordpress DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 CREATE USER 'wordpressuser'@'%' IDENTIFIED WITH mysql_native_password BY 'YourStrongPassword';
 GRANT ALL ON wordpress.* TO 'wordpressuser'@'%';
