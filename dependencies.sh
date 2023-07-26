@@ -22,6 +22,8 @@ FLUSH PRIVILEGES;
 EXIT;
 MYSQL_SCRIPT
 
+sudo rm /var/www/html/index.html
+
 # Download and extract WordPress
 wget https://wordpress.org/latest.tar.gz
 tar -xzvf latest.tar.gz
