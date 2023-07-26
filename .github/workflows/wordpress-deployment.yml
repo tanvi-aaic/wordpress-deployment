@@ -40,12 +40,16 @@ jobs:
           echo "INSTANCE_IP=$public_ip" >> $GITHUB_ENV
       - name: Deploy in EC2
         env:
-          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
         run: |
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip 
-          cd /home/ubuntu/ &&
-          sudo apt-get install apache2 -y &&
-          sudo systemctl start apache2
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip  '
+          
+              #Now we have got the access of EC2 and we will start the deploy .
+
+              cd /home/ubuntu/ &&
+              sudo apt-get install apache2 -y &&
+              sudo systemctl start apache2
+          '
       
