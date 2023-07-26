@@ -11,7 +11,14 @@ sudo chmod 755 /var/lib/mysql/mysql
 
 # Enable and restart Apache and MySQL services
 sudo systemctl enable apache2 mysql
-sudo systemctl restart mysql
+#sudo systemctl restart mysql
+# Create an expect script to automatically enter the password when prompted
+expect <<EOD
+  spawn sudo systemctl restart apache2 mysql
+  expect "assword:"
+  send "\r"
+  expect eof
+EOD
 
 # Create WordPress database and user
 sudo mysql -u root -p <<MYSQL_SCRIPT
