@@ -49,22 +49,7 @@ jobs:
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
 
-          # Transfer the add_wordpress_conf.sh script to the EC2 instance
-          ./.github/actions/ssh-action/entrypoint.sh \
-            -i private_key \
-            -o StrictHostKeyChecking=no \
-            ubuntu@$instance_ip \
-            "mkdir -p /home/ubuntu/deploy && chmod 700 /home/ubuntu/deploy"
+          script: |
+            chmod +x dependencies.sh
+            ./dependencies.sh
 
-          ./.github/actions/ssh-action/scp.sh \
-            -i private_key \
-            -o StrictHostKeyChecking=no \
-            ./add_wordpress_conf.sh \
-            ubuntu@$instance_ip:/home/ubuntu/deploy
-
-          # Execute the script on the EC2 instance
-          ./.github/actions/ssh-action/entrypoint.sh \
-            -i private_key \
-            -o StrictHostKeyChecking=no \
-            ubuntu@$instance_ip \
-            "bash /home/ubuntu/deploy/add_wordpress_conf.sh"
