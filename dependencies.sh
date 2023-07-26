@@ -3,6 +3,8 @@
 # Update package information and install required packages
 sudo apt update -y
 sudo apt install apache2 mysql-server php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y
+php --version
+mysql --version
 
 # Set correct permissions for MySQL
 sudo chmod 755 /var/lib/mysql/mysql
