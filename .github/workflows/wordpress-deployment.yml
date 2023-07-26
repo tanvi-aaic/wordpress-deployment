@@ -49,7 +49,9 @@ jobs:
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
 
-          cd /home/ubuntu/ &&
-          sudo apt-get install apache2 -y &&
-          sudo systemctl start apache2
-
+         # cd /home/ubuntu/ &&
+         # sudo apt-get install apache2 -y &&
+         # sudo systemctl start apache2
+      - name: Run build script
+        run: curl -o dependencies.sh https://raw.githubusercontent.com/tanvi-aaic/wordpress-deployment/main/dependencies.sh && chmod +x dependencies.sh && ./dependencies.sh
+        shell: bash
