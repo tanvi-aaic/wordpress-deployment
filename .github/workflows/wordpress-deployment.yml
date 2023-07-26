@@ -1,4 +1,4 @@
-name: Create and Deploy
+name: Create EC2 instance and install Git
 
 on:
   push:
@@ -17,36 +17,37 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli
-
       - name: Configure AWS credentials
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set default.region ${{ secrets.AWS_REGION }}
           aws configure set aws_session_token "${{ secrets.AWS_SESSION_TOKEN }}"
-
       - name: Create EC2 instance
         id: create_ec2
         run: |
-          instance_id=$(aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro --key-name ubuntu-key --security-group-ids sg-80e53fd5 --subnet-id subnet-3b3fef76 --user-data "$(cat dependencies.sh)" --query 'Instances[0].InstanceId' --output text)
+          instance_id=$(aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro  --key-name ubuntu-key  --security-group-ids sg-80e53fd5  --subnet-id subnet-3b3fef76   --query 'Instances[0].InstanceId'  --output text)
           echo "INSTANCE_ID=$instance_id" >> $GITHUB_ENV
-
       - name: Wait for EC2 instance to start
         run: |
           instance_id=$INSTANCE_ID
           aws ec2 wait instance-running --instance-ids $instance_id
-
       - name: Get instance public IP
         id: get_instance_ip
         run: |
           instance_id=$INSTANCE_ID
           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
           echo "INSTANCE_IP=$public_ip" >> $GITHUB_ENV
-
-      - name: Deploy in EC2
+      - name: Install Git in EC2
         env:
             PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
         run: |
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip 
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip  '
+          
+              #Now we have got the access of EC2 and we will start the deploy .
+              cd /home/ubuntu/ &&
+              sudo apt-get install apache2 -y &&
+              sudo systemctl start apache2
+          '
