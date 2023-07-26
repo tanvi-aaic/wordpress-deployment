@@ -42,22 +42,27 @@ jobs:
           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
           echo "INSTANCE_IP=$public_ip" >> $GITHUB_ENV
 
-      - name: Deploy in EC2
+      - name: Upload script to EC2
         env:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
         run: |
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip '
-          chmod +x dependencies.sh
-          ./dependencies.sh 
-          '
-          
-        #  cd /home/ubuntu/ &&
-          
-         # sudo apt-get install apache2 -y &&
-         # sudo systemctl start apache2
-      
-                 
-          ./dependencies.sh 
-          
+          cat private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip 'echo "$PRIVATE_KEY" > /home/ubuntu/private_key && chmod 600 /home/ubuntu/private_key'
+
+      - name: Transfer files to EC2
+        uses: actions/upload-artifact@v2
+        with:
+          name: deploy-scripts
+          path: ./dependencies.sh
+
+      - name: Download files on EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+        run: |
+          instance_ip=$INSTANCE_IP
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip 'mkdir -p /home/ubuntu/scripts'
+          scp -o StrictHostKeyChecking=no -i private_key ${{ runner.temp }}/github/workspace/deploy-scripts /home/ubuntu/scripts/dependencies.sh ubuntu@$instance_ip:/home/ubuntu/scripts/
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip 'chmod +x /home/ubuntu/scripts/dependencies.sh && /home/ubuntu/scripts/dependencies.sh'
