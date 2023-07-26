@@ -1,4 +1,4 @@
-name: Create EC2 instance and install Git
+name: Create and Deploy
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
       - name: Create EC2 instance
         id: create_ec2
         run: |
-          instance_id=$(aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro  --key-name ubuntu-key  --security-group-ids sg-80e53fd5  --subnet-id subnet-3b3fef76   --query 'Instances[0].InstanceId'  --output text)
+          instance_id=$(aws ec2 run-instances --image-id ami-053b0d53c279acc90 --instance-type t2.micro --key-name ubuntu-key --security-group-ids sg-80e53fd5 --subnet-id subnet-3b3fef76 --query 'Instances[0].InstanceId' --output text)
           echo "INSTANCE_ID=$instance_id" >> $GITHUB_ENV
 
       - name: Wait for EC2 instance to start
@@ -45,20 +45,50 @@ jobs:
 
       - name: Deploy in EC2
         env:
-            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
+          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
         run: |
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip  '
-          
-              #Now we have got the access of EC2 and we will start the deploy .
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip '
+            sudo apt-get update -y &&
+            sudo apt-get install debconf-utils apache2 mysql-server php libapache2-mod-php php-mysql php-redis php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y &&
+            php --version &&
+            mysql --version &&
+            sudo chmod 755 /var/lib/mysql/mysql &&
+            sudo systemctl enable apache2 mysql &&
+            sudo systemctl restart mysql &&
+            echo "mysql-server mysql-server/root_password password YourMySQLRootPassword" | sudo debconf-set-selections &&
+            echo "mysql-server mysql-server/root_password_again password YourMySQLRootPassword" | sudo debconf-set-selections &&
+            sudo apt install -y mysql-server &&
+            sudo chmod 755 /var/lib/mysql/mysql &&
+            sudo mysql -u root -pYourMySQLRootPassword <<MYSQL_SCRIPT
+            CREATE DATABASE wordpress DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+            CREATE USER 'wordpressuser'@'%' IDENTIFIED WITH mysql_native_password BY 'YourStrongPassword';
+            GRANT ALL ON wordpress.* TO 'wordpressuser'@'%';
+            FLUSH PRIVILEGES;
+            EXIT;
+            MYSQL_SCRIPT &&
+            sudo rm /var/www/html/index.html &&
+            wget https://wordpress.org/latest.tar.gz &&
+            tar -xzvf latest.tar.gz &&
+            sudo mv wordpress/* /var/www/html/ &&
+            sudo chown -R www-data:www-data /var/www/html/ &&
+            CONFIG_CONTENT=$(cat <<EOL
+            <VirtualHost *:80>
+                ServerAdmin admin@example.com
+                DocumentRoot /var/www/html/
+                ServerName your_domain.com
 
-              cd /home/ubuntu/ &&
-              sudo apt-get install apache2 -y &&
-              sudo systemctl start apache2
-              - name: Run build script
-      
-              chmod +x dependencies.sh
-              ./dependencies.sh 
-              '
+                <Directory /var/www/html/>
+                    AllowOverride All
+                </Directory>
 
+                ErrorLog \${APACHE_LOG_DIR}/error.log
+                CustomLog \${APACHE_LOG_DIR}/access.log combined
+            </VirtualHost>
+            EOL
+            )
+            echo "$CONFIG_CONTENT" | sudo tee /etc/apache2/sites-available/wordpress.conf > /dev/null &&
+            sudo a2ensite wordpress.conf &&
+            sudo systemctl restart apache2
+          '
