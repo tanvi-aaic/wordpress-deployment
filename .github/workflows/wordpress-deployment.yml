@@ -49,7 +49,7 @@ jobs:
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
 
-          script: |
-            chmod +x dependencies.sh
-            ./dependencies.sh
+          cd /home/ubuntu/ &&
+          sudo apt-get install apache2 -y &&
+          sudo systemctl start apache2
 
