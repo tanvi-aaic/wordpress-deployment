@@ -44,7 +44,7 @@ jobs:
 
       - name: Deploy in EC2
         env:
-            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
+          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
         run: |
           instance_ip=$INSTANCE_IP
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
