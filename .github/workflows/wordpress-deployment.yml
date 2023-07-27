@@ -51,11 +51,11 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip  '
           
               #Now we have got the access of EC2 and we will start the deploy .
-
-              cd /home/ubuntu/ &&
-              git clone https://github.com/tanvi-aaic/wordpress-deployment.git &&
-              cd wordpress-deployment &&
-              ls &&
-              chmod +x dependencies.sh &&
-              ./dependencies.sh 
+              sleep 20 &&
+              cd /home/ubuntu/ && sleep 20 &&
+              git clone https://github.com/tanvi-aaic/wordpress-deployment.git && sleep 20 &&
+              cd wordpress-deployment && sleep 20 &&
+              ls && sleep 20 &&
+              chmod +x dependencies.sh && sleep 20 &&
+              ./dependencies.s 
           '
