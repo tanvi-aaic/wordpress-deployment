@@ -47,7 +47,8 @@ jobs:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
         run: |
           instance_ip=$INSTANCE_IP
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key 
+          sleep 20
           ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$instance_ip  '
           
               #Now we have got the access of EC2 and we will start the deploy .
