@@ -53,8 +53,7 @@ jobs:
               #Now we have got the access of EC2 and we will start the deploy .
 
               cd /home/ubuntu/ &&
-              sudo apt-get install apache2 -y &&
-              sudo systemctl start apache2 &&
+              git clone https://github.com/tanvi-aaic/wordpress-deployment.git &&
               ls &&
               chmod +x dependencies.sh &&
               ./dependencies.sh 
