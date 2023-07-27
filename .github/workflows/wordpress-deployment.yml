@@ -54,7 +54,7 @@ jobs:
 
               cd /home/ubuntu/ &&
               sudo apt-get install apache2 -y &&
-              sudo systemctl start apache2
-              chmod +x dependencies.sh
+              sudo systemctl start apache2 &&
+              chmod +x dependencies.sh &&
               ./dependencies.sh 
           '
