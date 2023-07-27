@@ -58,5 +58,5 @@ jobs:
               cd wordpress-deployment && sleep 20 &&
               ls && sleep 20 &&
               chmod +x dependencies.sh && sleep 20 &&
-              ./dependencies.s 
+              ./dependencies.sh
           '
