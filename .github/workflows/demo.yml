@@ -31,11 +31,11 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key 
           sleep 20
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@54.91.1.163 '
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@3.89.103.22 '
             # Now we have got access to EC2 and we will start the deploy.
             sleep 20 &&
             cd /home/ubuntu/ && sleep 20 &&
             git clone https://github.com/tanvi-aaic/wordpress-deployment.git && sleep 20 &&
-         #   ls &&
-         #   sudo mv /home/ubuntu/wordpress-deployment/myPHPfile.php /var/www/html/
+            ls &&
+            sudo mv /home/ubuntu/wordpress-deployment/myPHPfile.php /var/www/html/
           '
