@@ -33,5 +33,5 @@ jobs:
             sleep 20 &&
             cd /home/ubuntu/ && sleep 20 &&
             git clone https://github.com/tanvi-aaic/wordpress-deployment.git && sleep 20 &&
-            sudo mv ./index.php /var/www/html/
+            sudo mv ./my-php-file.php /var/www/html/
           '
