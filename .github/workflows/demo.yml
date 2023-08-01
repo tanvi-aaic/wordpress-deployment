@@ -37,6 +37,6 @@ jobs:
             sleep 20
             git clone https://github.com/tanvi-aaic/wordpress-deployment.git 
             sleep 20
-            #ls
-            #sudo mv /home/ubuntu/wordpress-deployment/myPHPfile.php /var/www/html/
+            ls
+            sudo mv /home/ubuntu/wordpress-deployment/myPHPfile.php /var/www/html/
           '
