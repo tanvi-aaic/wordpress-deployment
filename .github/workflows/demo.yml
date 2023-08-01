@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key 
           sleep 20
-          ssh -o StrictHostKeyChecking=no -i $PRIVATE_KEY ubuntu@54.91.1.163 '
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@54.91.1.163 '
             # Now we have got access to EC2 and we will start the deploy.
             sleep 20 &&
             cd /home/ubuntu/ && sleep 20 &&
