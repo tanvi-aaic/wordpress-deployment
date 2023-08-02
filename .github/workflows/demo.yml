@@ -34,7 +34,7 @@ jobs:
             sleep 20
             cd /home/ubuntu/ 
             sleep 20
-            git clone https://github.com/tanvi-aaic/wordpress-deployment.git 
+            git clone https://github.com/tanvi-aaic/wordpress-deployment.git
             sleep 20
             ls
             sudo mv /home/ubuntu/wordpress-deployment/wordpress-code /var/www/html/
