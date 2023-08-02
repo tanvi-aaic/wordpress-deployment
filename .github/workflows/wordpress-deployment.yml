@@ -2,7 +2,7 @@ name: Create and Deploy
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   create-and-install:
