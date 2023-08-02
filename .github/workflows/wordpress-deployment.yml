@@ -2,8 +2,7 @@ name: Create and Deploy
 on:
   push:
     branches:
-      - main
-
+      - master
 jobs:
   create-and-install:
     runs-on: ubuntu-latest
