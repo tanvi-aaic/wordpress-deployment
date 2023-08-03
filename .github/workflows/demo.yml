@@ -33,9 +33,18 @@ jobs:
             # Now we have got access to EC2 and we will start the deploy.
             sudo su -
             sleep 20
-            cd /home/ubuntu/ 
+            cd /home/ubuntu/
             sleep 20
-            git clone https://github.com/tanvi-aaic/wordpress-deployment.git
+            
+            # Check if the repository is already cloned, if yes, then pull changes, otherwise, clone it.
+            if [ -d "wordpress-deployment" ]; then
+              cd wordpress-deployment
+              git pull
+              cd ..
+            else
+              git clone https://github.com/tanvi-aaic/wordpress-deployment.git
+            fi
+            
             sleep 20
             ls
             sudo mv /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/
