@@ -53,7 +53,8 @@ jobs:
             sleep 20
             ls
             
-            # Remove existing contents of the destination directory and move the new code.
-            sudo rm -rf /var/www/html/wordpress-code/*
-            sudo mv /home/ubuntu/wordpress-deployment/wordpress-code/* /var/www/html/wordpress-code/
+            # Use rsync to synchronize the new/modified files without deleting the existing ones.
+            sudo rsync -av --delete-after /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/wordpress-code/
+
+           # sudo mv /home/ubuntu/wordpress-deployment/wordpress-code/* /var/www/html/wordpress-code/
           '
