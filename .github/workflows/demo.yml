@@ -54,7 +54,7 @@ jobs:
             ls
             
             # Use rsync to synchronize the new/modified files without deleting the existing ones.
-            sudo rsync -av --delete-after /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/wordpress-code/
+            sudo rsync -av /var/www/html/wordpress-code/* /var/www/html/
 
            # sudo mv /home/ubuntu/wordpress-deployment/wordpress-code/* /var/www/html/wordpress-code/
           '
