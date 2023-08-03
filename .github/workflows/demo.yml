@@ -23,6 +23,24 @@ jobs:
           aws configure set default.region ${{ secrets.AWS_REGION }}
           aws configure set aws_session_token "${{ secrets.AWS_SESSION_TOKEN }}"
 
+      name: Deploy in EC2
+
+on:
+  push:
+    branches:
+      - main  # Adjust the branch name as needed
+
+env:
+  PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Deploy in EC2
         env:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
@@ -47,5 +65,8 @@ jobs:
             
             sleep 20
             ls
-            sudo mv /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/
+            
+            # Remove existing contents of the destination directory and move the new code.
+            sudo rm -rf /var/www/html/wordpress-code/*
+            sudo mv /home/ubuntu/wordpress-deployment/wordpress-code/* /var/www/html/wordpress-code/
           '
