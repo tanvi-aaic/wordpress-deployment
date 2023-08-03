@@ -2,7 +2,7 @@ name: Create and Deploy
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   create-and-install:
     runs-on: ubuntu-latest
@@ -39,6 +39,4 @@ jobs:
             sleep 20
             ls
             sudo mv /home/ubuntu/wordpress-deployment/wordpress-code /var/www/html/
-            sleep 20
-            rm -r wordpress-code
           '
