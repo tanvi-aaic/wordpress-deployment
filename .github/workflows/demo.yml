@@ -46,7 +46,7 @@ jobs:
               cd /home/ubuntu/wordpress-deployment
               git pull
             else
-              git clone https://github.com/tanvi-aaic/wordpress-deployment.git /home/ubuntu/wordpress-deployment
+              git clone https://github.com/tanvi-aaic/wordpress-deployment.git /home/ubuntu/
             fi
 
             sleep 20
