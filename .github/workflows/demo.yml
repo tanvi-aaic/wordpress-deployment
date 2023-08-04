@@ -50,7 +50,7 @@ jobs:
             fi
 
             sleep 20
-            ls /home/ubuntu/wordpress-deployment/wordpress-code
+            ls /home/ubuntu/wordpress-deployment/
 
             # Use rsync to synchronize the new/modified files without deleting the existing ones.
             sudo rsync -av --exclude '.git' /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/
