@@ -52,5 +52,5 @@ jobs:
             sleep 20
             ls /home/ubuntu/wordpress-deployment/wordpress-code/
 
-            sudo mv /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/
+            sudo rsync -avu /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/wordpress-code/
             '
