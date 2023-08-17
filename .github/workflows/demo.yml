@@ -60,6 +60,7 @@ jobs:
             sudo rsync -avu /var/www/html/wp-content/uploads/* /mnt/efs/
             sudo ln -s /mnt/efs/uploads /var/www/html/wp-content/uploads
 
+
             # Start web server
             sudo service apache2 start
             '
