@@ -3,8 +3,7 @@ name: Create and Deploy
 on:
   push:
     branches:
-      - main
-
+      - master
 env:
   PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
 
