@@ -3,7 +3,7 @@ name: Create and Deploy
 on:
   push:
     branches:
-      - master
+      - main
 env:
   PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
 
@@ -62,5 +62,5 @@ jobs:
 
 
             # Start web server
-            sudo service apache2 start
+            #sudo service apache2 start
             '
