@@ -53,13 +53,21 @@ jobs:
 
             sudo rsync -avu /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/wordpress-code/
             
-            # Mount EFS and move uploads
-            #sudo apt-get install -y nfs-common
-            #sudo mkdir /mnt/efs
-            #sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 "fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ " /mnt/efs
-            #sudo rsync -avu /var/www/html/wp-content/uploads/* /mnt/efs/
-            #sudo ln -s /mnt/efs/uploads /var/www/html/wp-content/uploads
-
+            sudo apt-get install nfs-common
+            sudo mkdir -p /efs/uploads
+            sudo mount -t nfs4 fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ /efs/uploads
+            df -h
+            sudo cp -r /var/www/html/wp-content/uploads/* /efs/uploads/
+            sudo umount /efs/uploads
+            sudo mount -t nfs4 fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ /var/www/html/wp-content/uploads
+            sudo nano /etc/fstab
+            fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ /var/www/html/wp-content nfs4 defaults 0 0 
+            cd /var/www/html/wp-content/uploads/2023/08
+            sudo rm uploads
+            sudo rm intial
+            sudo chown -R www-data:www-data 08
+            sudo chmod -R 755 08
+       
 
             # Start web server
             #sudo service apache2 start
