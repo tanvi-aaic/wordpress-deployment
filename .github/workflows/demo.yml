@@ -60,7 +60,7 @@ jobs:
             sudo rsync -avu /var/www/html/wp-content/uploads/* /efs/uploads/
             sudo umount /efs/uploads
             sudo mount -t nfs4 fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ /var/www/html/wp-content/uploads
-            echo "fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ /var/www/html/wp-content nfs4 defaults 0 0" >> /etc/fstab
+            sudo echo "fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ /var/www/html/wp-content nfs4 defaults 0 0" >> /etc/fstab
             cd /var/www/html/wp-content/uploads/2023/08
             #sudo rm uploads
             #sudo rm intial
