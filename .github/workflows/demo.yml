@@ -52,6 +52,7 @@ jobs:
             ls /home/ubuntu/wordpress-deployment/wordpress-code/
 
             sudo rsync -avu /home/ubuntu/wordpress-deployment/wordpress-code/ /var/www/html/wordpress-code/
+
             
             sudo apt-get install nfs-common
             sudo mkdir -p /efs/uploads
@@ -62,18 +63,7 @@ jobs:
             sudo mount -t nfs4 fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ /var/www/html/wp-content/uploads
             sudo sh -c "echo 'fs-0ca784c580bd723f1.efs.us-east-1.amazonaws.com:/ /var/www/html/wp-content nfs4 defaults 0 0' >> /etc/fstab"
             cd /var/www/html/wp-content/uploads/2023/08
-            # List contents of the parent directory for debugging
             ls -la /var/www/html/wp-content/uploads/2023/08
-
-            # Change ownership and permissions for '08' directory
             sudo chown -R www-data:www-data /var/www/html/wp-content/uploads/2023/08
             sudo chmod -R 755 /var/www/html/wp-content/uploads/2023/08
-            #sudo rm uploads
-            #sudo rm intial
-            #sudo chown -R www-data:www-data 08
-            #sudo chmod -R 755 08
-       
-
-            # Start web server
-            #sudo service apache2 start
             '
